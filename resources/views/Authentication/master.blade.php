@@ -167,13 +167,13 @@
                     @csrf
                     <h2>Login to your account</h2>
                     <div class="switch-buttons">
-                        <button class="active">Login as User</button>
-                        <button>Login as Admin</button>
+                        <button type="button" class="active">Login as User</button>
+                        <button type="button">Login as Admin</button>
                     </div>
                     <label for="email">Enter Your Email</label>
-                    <input type="email" name="email" placeholder="inputyouremail@gmail.com">
+                    <input type="email" name="email" placeholder="inputyouremail@gmail.com" required>
                     <label for="password">Password</label>
-                    <input type="password" name="password" placeholder="Password">
+                    <input type="password" name="password" placeholder="Password" required>
                     <button type="submit">Log In</button>
                 </form>
                 <div class="register">

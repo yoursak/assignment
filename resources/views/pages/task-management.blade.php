@@ -422,27 +422,40 @@
                         <h4><b>{{ $task->TITLE }}</b></h4>
                         <p>Details: {!! $task->DESCRIPTION !!}</p>
                     </div>
-                    <i class="fas fa-ellipsis-h more-btn"></i>
+                    <i class="fas fa-ellipsis-h more-btn" onclick="toggleTaskMenu(this)"></i>
                 </div>
 
                 <div class="task-actions">
                     <div class="assigned-by-sec">
                         <img src="{{ asset('assets/user.png') }}" alt="Profile Image">
-                        <p>{{ Session::get('type') == 1 ? 'To ' : 'By ' }}
-                            {{ Session::get('type') == 1 ? $task->NAME : 'Admin' }}</p>
+                        <p>
+                            {{ Session::get('type') == 1 ? 'To ' : 'By ' }}
+                            {{ Session::get('type') == 1 ? $task->NAME : ($task->ASSIGNED_TO == $task->CREATED_BY ? ' Me' : ' Admin') }}
+                        </p>
                     </div>
                     <div class="priority priority-{{ $task->PRIORITY }}">
-                        {{ $task->PRIORITY == 'low' ? 'Low' : ($task->PRIORITY == 'medium' ? 'Medium' : 'High') }}</div>
+                        {{ ucfirst($task->PRIORITY) }}
+                    </div>
                 </div>
 
                 <div class="task-menu" style="display: none;">
-                    <ul>
-                        <li onclick="openModalWithData()">Edit</li>
-                        <li onclick="$('#deleteTaskModal').fadeIn();$('#taskIdDelete').val('{{ $task->TASK_ID }}')">Delete</li>
-                    </ul>
+                    @if (Session::get('type') == 1 || $task->ASSIGNED_TO == $task->CREATED_BY)
+                        <ul>
+                            <li onclick="openModalWithData({{ $task }})">Edit</li>
+                            <li onclick="$('#deleteTaskModal').fadeIn(); $('#taskIdDelete').val('{{ $task->TASK_ID }}')">
+                                Delete
+                            </li>
+                        </ul>
+                    @else
+                        <ul>
+                            <li onclick="openModalWithData({{ $task }})">Edit</li>
+                            <li onclick="">Delete</li>
+                        </ul>
+                    @endif
                 </div>
             </div>
         @endforeach
+
     </div>
 
     <div id="taskModal" class="modal" style="display:none;">
@@ -530,16 +543,16 @@
                         <div class="form-group">
                             <label for="taskPriority">Priority*</label>
                             <select id="taskPriority1" name="taskPriority" required>
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
+                                <option value="1">Low</option>
+                                <option value="2">Medium</option>
+                                <option value="3">High</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-bottom">
                         <div class="form-group">
                             <label for="taskStatus">Assign Task *</label>
-                            <select id="taskStatus1" name="taskStatus">
+                            <select id="taskAssignTo1" name="taskStatus">
                                 @foreach ($Users as $user)
                                     <option value="{{ $user->USER_ID }}">{{ $user->NAME }}</option>
                                 @endforeach
@@ -564,12 +577,13 @@
     </div>
 
     <div id="deleteTaskModal" class="modal">
-        <form action="{{route('task.deleteTask')}}" method="POST">
+        <form action="{{ route('task.deleteTask') }}" method="POST">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Confirm Delete</h2>
-                    <button type="button" class="modal-close" onclick="$('#deleteTaskModal').fadeOut();">&times;</button>
+                    <button type="button" class="modal-close"
+                        onclick="$('#deleteTaskModal').fadeOut();">&times;</button>
                 </div>
 
                 <div class="modal-body">
@@ -578,7 +592,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="cancel-btn" onclick="$('#deleteTaskModal').fadeoUT();">Cancel</button>
+                    <button type="button" class="cancel-btn" onclick="$('#deleteTaskModal').fadeOut();">Cancel</button>
                     <button type="submit" class="save-btn">Delete</button>
                 </div>
             </div>
@@ -644,8 +658,32 @@
             });
         });
 
-        function openModalWithData() {
+        function openModalWithData(data) {
             $('#taskUpdateModal').fadeIn();
+            $('#taskName1').val(data.TITLE);
+            $('#taskDetails1').val(data.DESCRIPTION);
+            $('#taskDate1').val(data.DATE);
+            $('#taskPriority1').val(data.PRIORITY == 'high' ? '3' : (data.PRIORITY == 'medium' ? '2' : '1'));
+            $('#taskAssignTo1').val(data.ASSIGNED_TO);
+            $('#taskStatus1').val(data.PROGRESS);
+
+            $('#taskUpdateModal').fadeIn();
+
+
+            if (data.ASSIGNED_TO != data.CREATED_BY && "{{ Session::get('type') }}" != '1') {
+                $('#taskName1').prop('readonly', true);
+                $('#taskDetails1').prop('readonly', true);
+                $('#taskDate1').prop('readonly', true);
+                $('#taskPriority1').prop('disabled', true);
+                $('#taskAssignTo1').prop('disabled', true);
+            } else {
+                $('#taskName1').prop('readonly', false);
+                $('#taskDetails1').prop('readonly', false);
+                $('#taskDate1').prop('readonly', false);
+                $('#taskPriority1').prop('disabled', false);
+                $('#taskAssignTo1').prop('disabled', false);
+            }
+
         }
     </script>
 @endsection

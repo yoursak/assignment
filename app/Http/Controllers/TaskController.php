@@ -9,21 +9,27 @@ use Illuminate\Support\Facades\Session;
 
 class TaskController extends Controller
 {
-    public function index(){
-        $Users = User::where('USER_TYPE',2)->when(Session('type') == 2,function($query){
-            return $query->where('USER_ID',Session::get('id'));
+    public function index()
+    {
+        $Users = User::where('USER_TYPE', 2)->when(Session('type') == 2, function ($query) {
+            return $query->where('USER_ID', Session::get('id'));
         })->get();
-        $Tasks = Task::join('users', 'tasks.ASSIGNED_TO', '=', 'users.USER_ID')->get();
-        // dd($Tasks);
-        return view('pages.task-management',compact('Users','Tasks'));
+        $Tasks = Task::join('users', 'tasks.ASSIGNED_TO', '=', 'users.USER_ID')
+            ->when(Session::get('type') == 2, function ($query) {
+                return $query->where('ASSIGNED_TO', Session::get('id'));
+            })
+            ->get();
+        return view('pages.task-management', compact('Users', 'Tasks'));
     }
 
-    public function dashboard(){
-        $UserCount = User::where('USER_TYPE',2)->count();
-        return view('pages.dashboard',compact('UserCount'));
+    public function dashboard()
+    {
+        $UserCount = User::where('USER_TYPE', 2)->count();
+        return view('pages.dashboard', compact('UserCount'));
     }
 
-    public function createTask(Request $request){
+    public function createTask(Request $request)
+    {
         // dd($request->all());
 
         $Task = new Task();
@@ -37,22 +43,23 @@ class TaskController extends Controller
         $Task->CREATED_AT = now();
         $Task->save();
 
-        if($Task){
-            return redirect()->back()->with('success','Task created successfully');
-        }else{
-            return redirect()->back()->with('error','Task create Failed');
+        if ($Task) {
+            return redirect()->back()->with('success', 'Task created successfully');
+        } else {
+            return redirect()->back()->with('error', 'Task create Failed');
         }
     }
 
-    public function deleteTask(Request $request){
+    public function deleteTask(Request $request)
+    {
         // dd($request->all());
 
-        $Task = Task::where('TASK_ID',$request->id)->delete();
+        $Task = Task::where('TASK_ID', $request->id)->delete();
 
-        if( $Task ){
-            return redirect()->back()->with('success','Task deleted successfully');
-        }else{
-            return redirect()->back()->with('error','failed');
+        if ($Task) {
+            return redirect()->back()->with('success', 'Task deleted successfully');
+        } else {
+            return redirect()->back()->with('error', 'failed');
         }
     }
 }
