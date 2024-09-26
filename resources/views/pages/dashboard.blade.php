@@ -108,7 +108,7 @@
         <div class="dash-card">
             <div class="card-content">
                 <p>Total Tasks</p>
-                <h3>12</h3>
+                <h3>{{$TotalTask ?? '0'}}</h3>
             </div>
             <div class="card-icon">
                 <i class="fas fa-chart-bar"></i>
@@ -118,7 +118,7 @@
         <div class="dash-card">
             <div class="card-content">
                 <p>Completed</p>
-                <h3>06</h3>
+                <h3>{{$CompletedTask ?? '0'}}</h3>
             </div>
             <div class="card-icon">
                 <i class="fas fa-handshake"></i>

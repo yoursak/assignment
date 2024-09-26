@@ -524,8 +524,8 @@
                 <span class="close" onclick="dismissModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <form>
-
+                <form action="{{route('task.updateTask')}}" method="POST">
+                    @csrf
                     <div class="form-group">
                         <label for="taskName">Task Name*</label>
                         <input class="task-name-input" type="text" id="taskName1" name="taskName" required>

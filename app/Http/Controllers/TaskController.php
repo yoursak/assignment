@@ -25,7 +25,13 @@ class TaskController extends Controller
     public function dashboard()
     {
         $UserCount = User::where('USER_TYPE', 2)->count();
-        return view('pages.dashboard', compact('UserCount'));
+        $TotalTask = Task::when(Session::get('type') == 2, function ($query) {
+            return $query->where('ASSIGNED_TO', Session::get('id'));
+        })->count();
+        $CompletedTask = Task::when(Session::get('type') == 2, function ($query) {
+            return $query->where('ASSIGNED_TO', Session::get('id'));
+        })->where('PROGRESS',3)->count();
+        return view('pages.dashboard', compact('UserCount', 'TotalTask','CompletedTask'));
     }
 
     public function createTask(Request $request)
@@ -61,5 +67,10 @@ class TaskController extends Controller
         } else {
             return redirect()->back()->with('error', 'failed');
         }
+    }
+
+    public function updateTask(Request $request)
+    {
+        dd($request->all());
     }
 }
